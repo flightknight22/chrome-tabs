@@ -34,10 +34,10 @@
     <div class="chrome-tab">
       <div class="chrome-tab-dividers"></div>
       <div class="chrome-tab-background">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="chrome-tab-geometry-left" viewBox="0 0 214 36"><path d="M17 0h197v36H0v-2c4.5 0 9-3.5 9-8V8c0-4.5 3.5-8 8-8z"/></symbol><symbol id="chrome-tab-geometry-right" viewBox="0 0 214 36"><use xlink:href="#chrome-tab-geometry-left"/></symbol><clipPath id="crop"><rect class="mask" width="100%" height="100%" x="0"/></clipPath></defs><svg width="52%" height="100%"><use xlink:href="#chrome-tab-geometry-left" width="214" height="36" class="chrome-tab-geometry"/></svg><g transform="scale(-1, 1)"><svg width="52%" height="100%" x="-100%" y="0"><use xlink:href="#chrome-tab-geometry-right" width="214" height="36" class="chrome-tab-geometry"/></svg></g></svg>
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="chrome-tab-geometry-left" viewBox="0 0 214 36"><path d="M17 0h197v360H0v-2c4.5 0 100-250 9-8V8c0-20 3.5-25 8-8z"/></symbol><symbol id="chrome-tab-geometry-right" viewBox="0 0 214 36"><use xlink:href="#chrome-tab-geometry-left"/></symbol><clipPath id="crop"><rect class="mask" width="100%" height="100%" x="0"/></clipPath></defs><svg width="52%" height="100%"><use xlink:href="#chrome-tab-geometry-left" width="214" height="36" class="chrome-tab-geometry"/></svg><g transform="scale(-1, 1)"><svg width="50%" height="100%" x="-100%" y="0"><use xlink:href="#chrome-tab-geometry-right" width="214" height="36" class="chrome-tab-geometry"/></svg></g></svg>
       </div>
       <div class="chrome-tab-content">
-        <div class="chrome-tab-favicon"></div>
+        <i style="padding-left: 3px" class="chrome-tab-favicon"></i>
         <div class="chrome-tab-title"></div>
         <div class="chrome-tab-drag-handle"></div>
         <div class="chrome-tab-close"></div>
@@ -187,7 +187,7 @@
 
     addTab(tabProperties, { animate = true, background = false } = {}) {
       const tabEl = this.createNewTabEl()
-
+      tabEl.setAttribute('node-id', tabProperties.nodeID)
       if (animate) {
         tabEl.classList.add('chrome-tab-was-just-added')
         setTimeout(() => tabEl.classList.remove('chrome-tab-was-just-added'), 500)
@@ -216,15 +216,17 @@
       return !!this.activeTabEl
     }
 
-    setCurrentTab(tabEl) {
+    setCurrentTab(tabEl, manual = false) {
       const activeTabEl = this.activeTabEl
       if (activeTabEl === tabEl) return
       if (activeTabEl) activeTabEl.removeAttribute('active')
       tabEl.setAttribute('active', '')
-      this.emit('activeTabChange', { tabEl })
+      if(!manual) {
+        this.emit('activeTabChange', {tabEl})
+      }
     }
 
-    removeTab(tabEl) {
+    removeTab(tabEl, manual = false) {
       if (tabEl === this.activeTabEl) {
         if (tabEl.nextElementSibling) {
           this.setCurrentTab(tabEl.nextElementSibling)
@@ -233,7 +235,9 @@
         }
       }
       tabEl.parentNode.removeChild(tabEl)
-      this.emit('tabRemove', { tabEl })
+      if(!manual) {
+        this.emit('tabRemove', {tabEl})
+      }
       this.cleanUpPreviouslyDraggedTabs()
       this.layoutTabs()
       this.setupDraggabilly()
@@ -244,7 +248,7 @@
 
       const faviconEl = tabEl.querySelector('.chrome-tab-favicon')
       if (tabProperties.favicon) {
-        faviconEl.style.backgroundImage = `url('${ tabProperties.favicon }')`
+        faviconEl.classList += ` ${tabProperties.favicon}`
         faviconEl.removeAttribute('hidden', '')
       } else {
         faviconEl.setAttribute('hidden', '')
